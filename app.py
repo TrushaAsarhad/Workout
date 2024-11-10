@@ -1,41 +1,47 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
 import streamlit as st
+import joblib
+import pandas as pd
+import numpy as np
 
-# Load the dataset (replace with your actual file path)
-df = pd.read_csv('data.csv')
+# Load the saved model and scaler
+model = joblib.load('bmi_predictor_model.pkl')  # Adjust path as needed
+scaler = joblib.load('scaler.pkl')  # Adjust path as needed
 
-# Data preprocessing
-# Encode 'Gender' column (Male = 0, Female = 1)
-df['Gender'] = df['Gender'].apply(lambda x: 1 if x == 'Female' else 0)
+# Streamlit app title
+st.title('BMI Exercise Recommendation System')
 
-# Features: Weight, Height, Age, Gender
-X = df[['Weight', 'Height', 'Age', 'Gender']]
+# User input fields
+weight = st.number_input('Enter your weight (kg)', min_value=30.0, max_value=200.0, value=70.0, step=0.1)
+height = st.number_input('Enter your height (m)', min_value=1.2, max_value=2.5, value=1.75, step=0.01)
+age = st.number_input('Enter your age', min_value=18, max_value=100, value=30, step=1)
+gender = st.radio('Select your gender', ['Male', 'Female'])
 
-# Target: BMI case categories (assuming 'BMIcase' is the column you want to predict)
-y = df['BMIcase']
+# Gender encoding
+gender = 1 if gender == 'Female' else 0
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Prepare the input data
+user_input = np.array([[weight, height, age, gender]])
 
-# Scale features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+# Scale the input data using the loaded scaler
+user_input_scaled = scaler.transform(user_input)
 
-# Train the RandomForest model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train_scaled, y_train)
+# Make the prediction using the trained model
+bmi_case = model.predict(user_input_scaled)
 
-# Evaluate the model
-y_pred = model.predict(X_test_scaled)
-st.write("Classification Report:")
-st.write(classification_report(y_test, y_pred))
+# Map BMI case to readable labels
+bmi_labels = {
+    0: 'Underweight',
+    1: 'Normal',
+    2: 'Overweight',
+    3: 'Obese',
+    4: 'Severely Obese',
+    5: 'Morbidly Obese'
+}
 
-# Function to recommend exercises based on the predicted BMI category
+# Get the exercise recommendation based on BMI case
+bmi_category = bmi_labels.get(bmi_case[0], 'Unknown')
+
+# Exercise recommendation based on BMI category
 # Define a function to assign very detailed exercise recommendations based on BMI category
 def recommend_exercise(bmi_case):
     if bmi_case == 'underweight':
@@ -125,31 +131,8 @@ def recommend_exercise(bmi_case):
     else:
         return 'No recommendation available'
 
+exercise_plan = exercise_recommendations.get(bmi_category, 'No recommendation available')
 
-# Streamlit app to take user input and recommend exercises
-def app():
-    st.title("BMI Prediction & Exercise Recommendation System")
-
-    # User input for weight, height, age, gender
-    st.subheader("Enter Your Details")
-    weight = st.number_input("Weight (kg)", min_value=10, max_value=300, value=70)
-    height = st.number_input("Height (m)", min_value=1.0, max_value=3.0, value=1.75)
-    age = st.number_input("Age", min_value=10, max_value=120, value=25)
-    gender = st.selectbox("Gender", options=["Male", "Female"])
-
-    # Prepare the input for the model
-    user_input = [[weight, height, age, 1 if gender == "Female" else 0]]
-    user_input_scaled = scaler.transform(user_input)
-
-    # Predict BMI category
-    predicted_bmi_category = model.predict(user_input_scaled)[0]
-
-    # Show the prediction and recommended exercises
-    st.subheader(f"Predicted BMI Category: {predicted_bmi_category}")
-    exercise_plan = recommend_exercise(predicted_bmi_category)
-    st.subheader("Recommended Exercise Plan")
-    st.write(exercise_plan)
-
-# Run the app
-if __name__ == "__main__":
-    app()
+# Display results to the user
+st.write(f'Your BMI category is: {bmi_category}')
+st.write(f'Exercise Recommendation: {exercise_plan}')
