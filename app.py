@@ -1,10 +1,6 @@
 import joblib
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 # Load the saved model and scaler
 model = joblib.load('bmi_predictor_model.pkl')  # Adjust path as needed
@@ -30,6 +26,9 @@ user_input_scaled = scaler.transform(user_input)
 
 # Make the prediction using the trained model
 bmi_case = model.predict(user_input_scaled)
+
+# Debug: Print the raw prediction
+st.write(f"Raw prediction: {bmi_case}")
 
 # Map BMI case to readable labels
 bmi_labels = {
