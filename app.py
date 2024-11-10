@@ -30,18 +30,18 @@ bmi_case = model.predict(user_input_scaled)
 # Debug: Print the raw prediction
 st.write(f"Raw prediction: {bmi_case}")
 
-# Map BMI case to readable labels
+# Map BMI case to readable labels (update labels to match the model's output)
 bmi_labels = {
-    0: 'Underweight',
-    1: 'Normal',
-    2: 'Overweight',
-    3: 'Obese',
-    4: 'Severely Obese',
-    5: 'Morbidly Obese'
+    'underweight': 'Underweight',
+    'normal': 'Normal',
+    'overweight': 'Overweight',
+    'obese': 'Obese',
+    'severely obese': 'Severely Obese',
+    'morbidly obese': 'Morbidly Obese'
 }
 
 # Get the BMI category
-bmi_category = bmi_labels.get(bmi_case[0], 'Unknown')
+bmi_category = bmi_labels.get(bmi_case[0].lower(), 'Unknown')
 
 # Define a function to assign detailed exercise recommendations based on BMI category
 def recommend_exercise(bmi_category):
