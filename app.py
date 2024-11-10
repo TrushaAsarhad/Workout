@@ -1,7 +1,10 @@
-import streamlit as st
 import joblib
+import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # Load the saved model and scaler
 model = joblib.load('bmi_predictor_model.pkl')  # Adjust path as needed
@@ -38,13 +41,12 @@ bmi_labels = {
     5: 'Morbidly Obese'
 }
 
-# Get the exercise recommendation based on BMI case
+# Get the BMI category
 bmi_category = bmi_labels.get(bmi_case[0], 'Unknown')
 
-# Exercise recommendation based on BMI category
-# Define a function to assign very detailed exercise recommendations based on BMI category
-def recommend_exercise(bmi_case):
-    if bmi_case == 'underweight':
+# Define a function to assign detailed exercise recommendations based on BMI category
+def recommend_exercise(bmi_category):
+    if bmi_category == 'Underweight':
         return ('1. Squats: 3 sets of 12 reps, 2 days/week\n'
                 '2. Deadlifts: 3 sets of 8 reps, 2 days/week\n'
                 '3. Bench Press: 3 sets of 10 reps, 2 days/week\n'
@@ -56,7 +58,7 @@ def recommend_exercise(bmi_case):
                 '9. Foam Rolling for Muscle Recovery: 15 mins, daily\n'
                 '10. High-Protein Diet with supplements (as recommended by a nutritionist)')
 
-    elif bmi_case == 'normal':
+    elif bmi_category == 'Normal':
         return ('1. Running: 30 mins, 4 days/week\n'
                 '2. Elliptical Machine: 25 mins, 1 day/week\n'
                 '3. Jump Rope: 15 mins, 2 days/week\n'
@@ -68,7 +70,7 @@ def recommend_exercise(bmi_case):
                 '9. Planks: 3 sets of 30 seconds, 3 days/week\n'
                 '10. Core Exercises (e.g., leg raises, Russian twists): 3 sets of 15 reps, 3 days/week')
 
-    elif bmi_case == 'over weight':
+    elif bmi_category == 'Overweight':
         return ('1. Brisk Walking: 45 mins, 5 days/week\n'
                 '2. Cycling: 30 mins, 3 days/week\n'
                 '3. Swimming: 45 mins, 2 days/week\n'
@@ -80,7 +82,7 @@ def recommend_exercise(bmi_case):
                 '9. Calisthenics (e.g., push-ups, dips): 2 sets of 10 reps, 3 days/week\n'
                 '10. Balanced Diet Plan with portion control and tracking calories')
 
-    elif bmi_case == 'obese':
+    elif bmi_category == 'Obese':
         return ('1. Walking (Moderate pace): 30-45 mins, 5 days/week\n'
                 '2. Aqua Aerobics: 45 mins, 3 days/week\n'
                 '3. Recumbent Bike: 30 mins, 3 days/week\n'
@@ -92,7 +94,7 @@ def recommend_exercise(bmi_case):
                 '9. Chair Yoga: 15 mins, 4 days/week\n'
                 '10. Focus on a diet rich in vegetables, lean proteins, and whole grains with portion control')
 
-    elif bmi_case == 'severe obese':
+    elif bmi_category == 'Severely Obese':
         return ('1. Water Walking: 30 mins, 4 days/week\n'
                 '2. Stationary Cycling (Low resistance): 20-30 mins, 3 days/week\n'
                 '3. Seated Leg Raises: 2 sets of 12 reps, 3 days/week\n'
@@ -104,7 +106,7 @@ def recommend_exercise(bmi_case):
                 '9. Mindful Breathing Exercises: 10 mins, daily\n'
                 '10. Consult a dietitian for a personalized, calorie-restricted nutrition plan')
 
-    elif bmi_case == 'morbidly obese':
+    elif bmi_category == 'Morbidly Obese':
         return ('1. Walking with Support: 20 mins, 5 days/week\n'
                 '2. Aquatic Therapy: 30 mins, 4 days/week\n'
                 '3. Seated Marches: 2 sets of 15 reps, 3 days/week\n'
@@ -116,22 +118,11 @@ def recommend_exercise(bmi_case):
                 '9. Progressive Muscle Relaxation: 10 mins, 3 days/week\n'
                 '10. Light Resistance Band Workouts: 2 sets of 8 reps, 2 days/week')
 
-    elif bmi_case == 'extremely obese':
-        return ('1. Short-Distance Walking with Support: 15 mins, 4-5 days/week\n'
-                '2. Chair-Based Cardio: 15-20 mins, 4 days/week\n'
-                '3. Seated Leg Press (with light resistance): 2 sets of 8 reps, 2 days/week\n'
-                '4. Resistance Band Rows (seated): 2 sets of 10 reps, 2 days/week\n'
-                '5. Supported Squats: 1 set of 10 reps, 2 days/week\n'
-                '6. Seated Side Bends: 15 mins, daily\n'
-                '7. Breathing Exercises (e.g., diaphragmatic breathing): 10 mins, daily\n'
-                '8. Gentle Stretching Routine: 10 mins, daily\n'
-                '9. Progressive Muscle Relaxation: 10 mins, 3 days/week\n'
-                '10. Consult with a physician for personalized guidance and safety')
-
     else:
         return 'No recommendation available'
 
-exercise_plan = exercise_recommendations.get(bmi_category, 'No recommendation available')
+# Get the exercise recommendation based on BMI category
+exercise_plan = recommend_exercise(bmi_category)
 
 # Display results to the user
 st.write(f'Your BMI category is: {bmi_category}')
